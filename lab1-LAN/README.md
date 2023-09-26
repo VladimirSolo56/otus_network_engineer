@@ -328,3 +328,9 @@ trace to 192.168.3.3, 8 hops max, press Ctrl+C to stop
  1   192.168.4.1   0.899 ms  0.532 ms  0.470 ms
  2   *192.168.3.3   0.685 ms (ICMP type:3, code:3, Destination port unreachable)
 ```
+# Работа над ошибками 
+Для того, чтобы роутер смог обрабатывать нативный трафик, был привязан нативный vlan к подинтерфейсу et0/1.8. Для этого я добавил в команду ```R1(config-subif)#encapsulation dot1Q 8``` ключевое слово ```native```. 
+Команда целиком выглядит следующим образом:
+```
+R1(config-subif)#encapsulation dot1Q 8 native
+```
