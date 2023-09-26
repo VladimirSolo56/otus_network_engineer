@@ -281,7 +281,7 @@ R1(config-subif)#ip address 192.168.4.1 255.255.255.0
 R1(config-subif)#exit
 R1(config)#int et0/1.8                           
 R1(config-subif)#description Default Gateway for VLAN 8
-R1(config-subif)#encapsulation dot1Q 8                 
+R1(config-subif)#encapsulation dot1Q 8 native               
 R1(config-subif)#exit
 R1(config)#int et0/1                           
 R1(config-if)#description Trunk link to S1
@@ -322,4 +322,9 @@ PC-A> ping 192.168.3.12
 84 bytes from 192.168.3.12 icmp_seq=5 ttl=255 time=0.631 ms
 ```
 ## Выполните следующий тест с помощью PC-B.
-Тест не смог выполнить, так как команда ```tracert``` не найдена.
+```
+PC-B>trace 192.168.3.3
+trace to 192.168.3.3, 8 hops max, press Ctrl+C to stop
+ 1   192.168.4.1   0.899 ms  0.532 ms  0.470 ms
+ 2   *192.168.3.3   0.685 ms (ICMP type:3, code:3, Destination port unreachable)
+```
