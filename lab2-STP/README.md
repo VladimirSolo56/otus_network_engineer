@@ -62,4 +62,123 @@ Building configuration...
 Compressed configuration from 933 bytes to 660 bytes[OK]
 ```
 Аналогично с другими коммутаторами 
-### Шаг 4:	Проверьте связь.
+### Шаг 4:	Проверьте связь
+Проверьте способность компьютеров обмениваться эхо-запросами.
+
+1. Успешно выполняется эхо-запрос от коммутатора S1 на коммутатор S2.
+2. Успешно выполняется эхо-запрос от коммутатора S1 на коммутатор S3.
+3. Успешно  выполняется эхо-запрос от коммутатора S2 на коммутатор S3.
+
+## Часть 2:	Определение корневого моста
+
+### Шаг 1:	Отключите все порты на коммутаторах
+На коммутаторе S1:
+```
+S1(config)#int range ethernet 0/0-3 
+S1(config-if-range)#shutdown 
+```
+Аналогично на других
+### Шаг 2:	Настройте подключенные порты в качестве транковых.
+На коммутаторе S1:
+```
+S1(config)#int range ethernet 0/0-3 
+S1(config-if-range)#switchport trunk encapsulation dot1q 
+S1(config-if-range)#switchport mode trunk 
+```
+### Шаг 3:	Включите порты e0/1 и e0/3 на всех коммутаторах.
+```
+S1(config)#int et 0/1
+S1(config-if)#no shutdown 
+S1(config)#int et 0/3
+S1(config-if)#no shu
+S1(config-if)#no shutdown 
+```
+
+### Шаг 4:	Отобразите данные протокола spanning-tree.
+S1:
+```
+S1#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             This bridge is the root
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.1000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/3               Desg FWD 100       128.4    Shr 
+```
+
+S2:
+```
+S2#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Root FWD 100       128.2    Shr 
+Et0/3               Altn BLK 100       128.4    Shr 
+```
+S3:
+```
+S3#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        4 (Ethernet0/3)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/3               Root FWD 100       128.4    Shr 
+```
+
+
+1. Какой коммутатор является корневым мостом? Почему этот коммутатор был выбран протоколом spanning-tree в качестве корневого моста? Коммутатор ```S1``` является корневым, так как у него наименьший мас-адрес.
+
+2. Какие порты на коммутаторе являются корневыми портами? 
+Порт Et0/1 S2 и порт Et0/3 S3.
+
+3. Какие порты на коммутаторе являются назначенными портами?
+Порт Et0/1 Et0/3 S1 и порт Et0/1 S3.
+
+4. Какой порт отображается в качестве альтернативного и в настоящее время заблокирован? 
+Порт Et0/3 S2.
+
+5. Почему протокол spanning-tree выбрал этот порт в качестве невыделенного (заблокированного) порта?
+Минимальный BID соседа S3: ```aabb.cc00.2000``` 
+
+## Часть 3:	Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов
+### Шаг 1:	Определите коммутатор с заблокированным портом.
+### Шаг 2:	Измените стоимость порта.
+### Шаг 3:	Просмотрите изменения протокола spanning-tree.
+### Шаг 4:	Удалите изменения стоимости порта.
