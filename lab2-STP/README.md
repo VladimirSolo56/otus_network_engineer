@@ -179,6 +179,117 @@ Et0/3               Root FWD 100       128.4    Shr
 
 ## Часть 3:	Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов
 ### Шаг 1:	Определите коммутатор с заблокированным портом.
+Коммутатор S2:
+```
+S2#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Root FWD 100       128.2    Shr 
+Et0/3               Altn BLK 100       128.4    Shr 
+```
 ### Шаг 2:	Измените стоимость порта.
+```
+S2(config)#int et0/3
+S2(config-if)#spanning-tree cost 10
+```
 ### Шаг 3:	Просмотрите изменения протокола spanning-tree.
+При  изменения стоимости порта ничего не проиходит 
+```
+S2#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        2 (Ethernet0/1)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/1               Root FWD 100       128.2    Shr 
+Et0/3               Altn BLK 10        128.4    Shr 
+```
 ### Шаг 4:	Удалите изменения стоимости порта.
+
+## Часть 4:	Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов
+
+1. Включил порты F0/1 и F0/3 на всех коммутаторах.
+2. Какой порт выбран протоколом STP в качестве порта корневого моста на каждом коммутаторе некорневого моста? 
+Порт с наименьшим приоритетом порта Et0/0 на S2 и Et0/2 на S3.
+
+S3
+```
+S3#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        3 (Ethernet0/2)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.2000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Desg FWD 100       128.1    Shr 
+Et0/1               Desg FWD 100       128.2    Shr 
+Et0/2               Root FWD 100       128.3    Shr 
+Et0/3               Altn BLK 100       128.4    Shr 
+```
+
+S2 
+```
+S2#show spanning-tree 
+
+VLAN0001
+  Spanning tree enabled protocol rstp
+  Root ID    Priority    32769
+             Address     aabb.cc00.1000
+             Cost        100
+             Port        1 (Ethernet0/0)
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     aabb.cc00.3000
+             Hello Time   2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  300 sec
+
+Interface           Role Sts Cost      Prio.Nbr Type
+------------------- ---- --- --------- -------- --------------------------------
+Et0/0               Root FWD 100       128.1    Shr 
+Et0/1               Altn BLK 100       128.2    Shr 
+Et0/2               Altn BLK 100       128.3    Shr 
+Et0/3               Altn BLK 100       128.4    Shr 
+```
+## Вопросы для повторения:
+1.	Какое значение протокол STP использует первым после выбора корневого моста, чтобы определить выбор порта?
+```COST```
+2.	Если первое значение на двух портах одинаково, какое следующее значение будет использовать протокол STP при выборе порта?
+```BID```
+3.	Если оба значения на двух портах равны, каким будет следующее значение, которое использует протокол STP при выборе порта?
+```PID```
