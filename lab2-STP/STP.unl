@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<lab name="STP" version="1" scripttimeout="300" lock="0">
+  <description>settings STP</description>
+  <topology>
+    <nodes>
+      <node id="1" name="S1" type="iol" template="iol" image="L2-ADVENTERPRISEK9-M-15.2-IRON-20151103.bin" ethernet="1" nvram="1024" ram="1024" serial="0" console="" delay="0" icon="Switch.png" config="0" left="189" top="204">
+        <interface id="0" name="e0/0" type="ethernet" network_id="5"/>
+        <interface id="16" name="e0/1" type="ethernet" network_id="6"/>
+        <interface id="32" name="e0/2" type="ethernet" network_id="1"/>
+        <interface id="48" name="e0/3" type="ethernet" network_id="3"/>
+      </node>
+      <node id="2" name="S3" type="iol" template="iol" image="L2-ADVENTERPRISEK9-M-15.2-IRON-20151103.bin" ethernet="1" nvram="1024" ram="1024" serial="0" console="" delay="0" icon="Switch.png" config="0" left="522" top="207">
+        <interface id="0" name="e0/0" type="ethernet" network_id="2"/>
+        <interface id="16" name="e0/1" type="ethernet" network_id="4"/>
+        <interface id="32" name="e0/2" type="ethernet" network_id="1"/>
+        <interface id="48" name="e0/3" type="ethernet" network_id="3"/>
+      </node>
+      <node id="3" name="S2" type="iol" template="iol" image="L2-ADVENTERPRISEK9-M-15.2-IRON-20151103.bin" ethernet="1" nvram="1024" ram="1024" serial="0" console="" delay="0" icon="Switch.png" config="0" left="336" top="489">
+        <interface id="0" name="e0/0" type="ethernet" network_id="5"/>
+        <interface id="16" name="e0/1" type="ethernet" network_id="6"/>
+        <interface id="32" name="e0/2" type="ethernet" network_id="2"/>
+        <interface id="48" name="e0/3" type="ethernet" network_id="4"/>
+      </node>
+    </nodes>
+    <networks>
+      <network id="3" type="bridge" name="Net-R1iface_48" left="321" top="238" visibility="0"/>
+      <network id="1" type="bridge" name="Net-R1iface_32" left="321" top="238" visibility="0"/>
+      <network id="2" type="bridge" name="Net-R2iface_0" left="606" top="244" visibility="0"/>
+      <network id="4" type="bridge" name="Net-R2iface_16" left="606" top="244" visibility="0"/>
+      <network id="5" type="bridge" name="Net-R3iface_0" left="504" top="406" visibility="0"/>
+      <network id="6" type="bridge" name="Net-R3iface_16" left="504" top="406" visibility="0"/>
+    </networks>
+  </topology>
+</lab>
