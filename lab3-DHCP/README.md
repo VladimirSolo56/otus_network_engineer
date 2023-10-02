@@ -94,3 +94,4 @@ Building configuration...
 ```
 R1(config)#clock timezone CST +3
 ```
+Аналогично с роутером R2
