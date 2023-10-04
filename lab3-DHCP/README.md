@@ -178,30 +178,51 @@ Building configuration...
 1. Назначьте коммутатору имя устройства.
 Откройте окно конфигурации
 ```
+Switch(config)#hostname S1
 ```
 2. Отключите поиск по DNS, чтобы маршрутизатор не пытался перевести неправильно введенные команды так, как если бы они были именами хостов.
 ```
+S1(config)#no ip domain-lookup 
 ```
 3. Назначьте class в качестве привилегированного зашифрованного пароля EXEC.
 ```
+S1(config)#enable secret class
 ```
 4. Назначьте cisco в качестве пароля консоли и включите вход в систему.
 ```
+S1(config)#line console 0
+S1(config-line)#password cisco
+S1(config-line)#login
 ```
 5. Назначьте cisco в качестве пароля VTY и разрешите вход в систему.
 ```
+S1(config)#line vty 0 4
+S1(config-line)#password cisco
+S1(config-line)#login
 ```
 6. Зашифруйте пароли в виде открытого текста.
 ```
+S1(config)#service password-encryption 
 ```
 7. Создайте баннер, предупреждающий любого, кто получает доступ к устройству, о том, что несанкционированный доступ запрещен.
 ```
+S1(config)#banner motd #access to this device is prohibited#
 ```
 8. Сохраните текущую конфигурацию в файле конфигурации запуска.
 ```
+S1(config)#wr em
+*Oct  4 08:15:59.207: %SYS-6-CLOCKUPDATE: System clock has been updated from 08:15:59 UTC Wed Oct 4 2
+023 to 11:15:59 CST Wed Oct 4 2023, configured from console by console.
 ```
 9. Установите часы на переключателе на сегодняшнее время и дату.
 Примечание: Используйте знак вопроса (?), чтобы указать правильную последовательность параметров, необходимых для выполнения этой команды.
 ```
+S1(config)#clock timezone CST +3
 ```
 10. Скопируйте текущую конфигурацию в конфигурацию запуска.
+```
+S1#copy running-config startup-config
+Destination filename [startup-config]? 
+Building configuration...
+Compressed configuration from 915 bytes to 663 bytes[OK]
+```
