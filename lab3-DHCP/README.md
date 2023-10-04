@@ -210,9 +210,9 @@ S1(config)#banner motd #access to this device is prohibited#
 ```
 8. Сохраните текущую конфигурацию в файле конфигурации запуска.
 ```
-S1(config)#wr em
-*Oct  4 08:15:59.207: %SYS-6-CLOCKUPDATE: System clock has been updated from 08:15:59 UTC Wed Oct 4 2
-023 to 11:15:59 CST Wed Oct 4 2023, configured from console by console.
+S1#wr mem
+Building configuration...
+Compressed configuration from 915 bytes to 661 bytes[OK]
 ```
 9. Установите часы на переключателе на сегодняшнее время и дату.
 Примечание: Используйте знак вопроса (?), чтобы указать правильную последовательность параметров, необходимых для выполнения этой команды.
