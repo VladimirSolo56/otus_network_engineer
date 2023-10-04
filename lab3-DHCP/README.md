@@ -24,10 +24,10 @@
 ## Таблица VLAN
 | VLAN| NAME| Interface Assigned |
 |------|----|-------------------|
-|1|N/A| S1: e0/3 |
+|1|N/A| S2: e0/3 |
 |100| Clients | S1: e0/0|
 |200| Management| S1: VLAN 200|
-|999|Parking_Lot|S1: e0/1-3 |
+|999|Parking_Lot|S1: e0/1-2 |
 |1000| Native| N/A|
 
 ## Часть 1: Построение сети и настройка основных параметров устройства
@@ -231,14 +231,72 @@ Compressed configuration from 915 bytes to 663 bytes[OK]
 Примечание: S2 настроен только с базовыми настройками.
 1. Создайте и назовите требуемые VLAN на коммутаторе 1 из приведенной выше таблицы.
 ```
+S1#show vlan brief 
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3
+100  Clients                          active    
+200  Management                       active    
+999  ParkingLot                       active    
+1000 Native                           active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
 ```
 2. Сконфигурируйте и активируйте интерфейс управления на S1 (VLAN 200), используя второй IP-адрес из подсети, вычисленный ранее. Кроме того, установите шлюз по умолчанию на S1.
 ```
+S1(config)#int vlan 200  
+S1(config-if)#ip address 192.168.1.66 255.255.255.224
+S1(config-if)#no shutdown 
+S1(config-if)#exit
+S1(config)#ip route 0.0.0.0 0.0.0.0 192.168.1.65
 ```
 3. Сконфигурируйте и активируйте интерфейс управления на S2 (VLAN 1), используя второй IP-адрес из подсети, вычисленный ранее. Кроме того, установите шлюз по умолчанию на S2.
 ```
+S2(config)#int vlan 1
+S2(config-if)#ip address 192.168.1.98 255.255.255.240
+S2(config-if)#exit
+S2(config)#ip route 0.0.0.0 0.0.0.0 192.168.1.97
 ```
 4. Назначьте все неиспользуемые порты на S1 VLAN Parking_Lot, сконфигурируйте их для статического режима доступа и административно деактивируйте их. На S2 административно деактивируйте все неиспользуемые порты.
 Примечание: Команда interface range полезна для выполнения этой задачи с минимальным количеством необходимых команд.
 ```
+S1(config)#int range et0/1-2
+S1(config-if-range)#switchport mode access 
+S1(config-if-range)#switchport access vlan 999
+S1(config-if-range)#shutdown 
+
+S2(config)#int range et0/1-2
+S2(config-if-range)#switchport mode access 
+S2(config-if-range)#shut
+```
+
+### Шаг 8: Назначьте VLAN правильным интерфейсам коммутатора.
+1. Назначьте используемые порты соответствующей VLAN (указанной в таблице VLAN выше) и сконфигурируйте их для статического режима доступа.
+Откройте окно конфигурации
+```
+S1(config)#int et0/0
+S1(config-if)#switchport mode access 
+S1(config-if)#switchport access vlan 100
+S1(config-if)#no shutdown
+```
+2. Убедитесь, что виртуальные сети назначены правильным интерфейсам.
+Вопрос:
+Почему интерфейс F0/5 указан в разделе VLAN 1?
+```
+S1(config-if)#do show vlan bri
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/3
+100  Clients                          active    Et0/0
+200  Management                       active    
+999  ParkingLot                       active    Et0/1, Et0/2
+1000 Native                           active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
 ```
