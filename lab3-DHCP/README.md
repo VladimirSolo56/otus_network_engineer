@@ -378,3 +378,10 @@ R1(dhcp-config)#domain-name ccna-lab.com
 R1(dhcp-config)#lease 2 12 30
 R1(dhcp-config)#exit
 ```
+### Шаг 2: Сохраните вашу конфигурацию
+Сохраните текущую конфигурацию в файле конфигурации запуска.
+```
+R1#wr mem
+Building configuration...
+[OK]
+```
