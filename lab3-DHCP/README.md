@@ -300,3 +300,43 @@ VLAN Name                             Status    Ports
 1004 fddinet-default                  act/unsup 
 1005 trnet-default                    act/unsup 
 ```
+### Шаг 9: Вручную сконфигурируйте интерфейс S1 Et0/3 как магистральный 802.1Q.
+1. Измените режим порта коммутатора на интерфейсе для принудительного подключения к магистрали.
+```
+S1(config)#int et0/3
+S1(config-if)#switchport trunk encapsulation dot1q 
+```
+2. В рамках конфигурации магистрали установите для собственной VLAN значение 1000.
+```
+S1(config-if)#switchport mode trunk 
+S1(config-if)#switchport trunk native vlan 1000
+```
+3. В качестве другой части конфигурации магистрали укажите, что сетям VLAN 100, 200 и 1000 разрешено пересекать магистраль.
+```
+S1(config-if)#switchport trunk allowed vlan 1000,100,200
+```
+4. Сохраните текущую конфигурацию в файле конфигурации запуска.
+```
+S1#wr me
+Building configuration...
+Compressed configuration from 1330 bytes to 889 bytes[OK]
+```
+5. Проверьте состояние транкинга.
+```
+S1#show interfaces trunk 
+
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/3       on               802.1q         trunking      1000
+
+Port        Vlans allowed on trunk
+Et0/3       100,200,1000
+
+Port        Vlans allowed and active in management domain
+Et0/3       100,200,1000
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/3       100,200,1000
+```
+Вопрос:
+На данный момент, какой IP-адрес был бы у ПК, если бы они были подключены к сети с помощью DHCP?
+На данный момент он взял бы адрес из области адресов APIPA, так как он не получит ответ от DHCP сервера
