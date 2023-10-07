@@ -385,3 +385,203 @@ R1#wr mem
 Building configuration...
 [OK]
 ```
+### Шаг 3: Проверьте конфигурацию сервера DHCPv4
+1. Выполните команду show ip dhcp pool, чтобы просмотреть сведения о пуле.
+```
+R1#show ip dhcp pool 
+
+Pool R1_Client_LA :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 62
+ Leased addresses               : 0
+ Pending event                  : none
+ 1 subnet is currently in the pool :
+ Current index        IP address range                    Leased addresses
+ 192.168.1.1          192.168.1.1      - 192.168.1.62      0
+
+Pool R2_Client_LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0 
+ Total addresses                : 14
+ Leased addresses               : 0
+ Pending event                  : none
+ 1 subnet is currently in the pool :
+ Current index        IP address range                    Leased addresses
+ 192.168.1.97         192.168.1.97     - 192.168.1.110     0
+```
+2. Выполните команду show ip dhcp bindings, чтобы проверить установленные назначения DHCP-адресов.
+```
+R1#show ip dhcp binding 
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/     Lease expiration        Type
+    Hardware address/
+    User name
+
+```
+3. Выполните команду show ip dhcp server statistics для проверки DHCP-сообщений.
+```
+R1#show ip dhcp server statistics 
+Memory usage         25174
+Address pools        2
+Database agents      0
+Automatic bindings   0
+Manual bindings      0
+Expired bindings     0
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         0
+DHCPREQUEST          0
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            0
+DHCPACK              0
+DHCPNAK              0
+```
+
+### Шаг 4: Попытайтесь получить IP-адрес из DHCP на ПК-A
+1. Откройте командную строку на ПК-A и введите команду ipconfig /renew.
+```
+VPCS> ip dhcp  
+DDORA IP 192.168.1.6/26 GW 192.168.1.1
+```
+2. Как только процесс обновления будет завершен, выполните команду ipconfig для просмотра новой информации об IP.
+```
+VPCS> show ip
+
+NAME        : VPCS[1]
+IP/MASK     : 192.168.1.6/26
+GATEWAY     : 192.168.1.1
+DNS         : 
+DHCP SERVER : 192.168.1.1
+DHCP LEASE  : 217795, 217800/108900/190575
+DOMAIN NAME : ccna-lab.com
+MAC         : 00:50:79:66:68:05
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+```
+3. Проверьте подключение, проверив IP-адрес интерфейса Et0/1 R1.
+```
+VPCS> ping 192.168.1.1
+
+84 bytes from 192.168.1.1 icmp_seq=1 ttl=255 time=0.431 ms
+84 bytes from 192.168.1.1 icmp_seq=2 ttl=255 time=0.653 ms
+84 bytes from 192.168.1.1 icmp_seq=3 ttl=255 time=0.661 ms
+84 bytes from 192.168.1.1 icmp_seq=4 ttl=255 time=0.659 ms
+84 bytes from 192.168.1.1 icmp_seq=5 ttl=255 time=0.705 ms
+```
+## Часть 3: Настройка и проверка DHCP-ретранслятора на R2
+В части 3 вы настроите R2 для ретрансляции DHCP-запросов из локальной сети по интерфейсу G0/0/1 на DHCP-сервер (R1).
+
+### Шаг 1: Настройте R2 в качестве агента ретрансляции DHCP для ЗЕМЛИ на G0/0/1
+1. Настройте команду ip helper-address на Et0/3, указав IP-адрес R1 Et0/0.
+```
+R2(config-if)#ip helper-address 10.0.0.1 
+```
+2. Сохраните вашу конфигурацию.
+```
+R2#wr mem
+Building configuration...
+[OK]
+```
+### Шаг 2: Попытайтесь получить IP-адрес из DHCP на PCB
+1. Откройте командную строку на PC-B и введите команду ipconfig /renew.
+```
+VPCS> ip dhcp
+DDORA IP 192.168.1.102/28 GW 192.168.1.97
+```
+2. Как только процесс обновления будет завершен, выполните команду ipconfig для просмотра новой информации об IP.
+```
+VPCS> show ip
+
+NAME        : VPCS[1]
+IP/MASK     : 192.168.1.102/28
+GATEWAY     : 192.168.1.97
+DNS         : 
+DHCP SERVER : 10.0.0.1
+DHCP LEASE  : 217796, 217800/108900/190575
+DOMAIN NAME : ccna-lab.com
+MAC         : 00:50:79:66:68:06
+LPORT       : 20000
+RHOST:PORT  : 127.0.0.1:30000
+MTU         : 1500
+```
+3. Проверьте подключение, проверив IP-адрес интерфейса Et0/1 R1.
+```
+VPCS> ping 192.168.1.97
+
+84 bytes from 192.168.1.97 icmp_seq=1 ttl=255 time=0.347 ms
+84 bytes from 192.168.1.97 icmp_seq=2 ttl=255 time=0.668 ms
+84 bytes from 192.168.1.97 icmp_seq=3 ttl=255 time=0.657 ms
+84 bytes from 192.168.1.97 icmp_seq=4 ttl=255 time=0.719 ms
+84 bytes from 192.168.1.97 icmp_seq=5 ttl=255 time=0.655 ms
+```
+4. Выполните команду show ip dhcp binding на R1 для проверки привязок DHCP.
+```
+R1#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/     Lease expiration        Type
+    Hardware address/
+    User name
+192.168.1.6         0100.5079.6668.05       Oct 10 2023 01:05 AM    Automatic
+192.168.1.102       0100.5079.6668.06       Oct 10 2023 01:15 AM    Automatic
+```
+5. Выполните команду show ip dhcp server statistics на R1 и R2 для проверки сообщений DHCP.
+```
+R1#show ip dhcp server statistics
+Memory usage         42092
+Address pools        2
+Database agents      0
+Automatic bindings   2
+Manual bindings      0
+Expired bindings     0
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         4
+DHCPREQUEST          2
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            2
+DHCPACK              2
+DHCPNAK              0
+
+R2#show ip dhcp server statistics 
+Memory usage         22565
+Address pools        0
+Database agents      0
+Automatic bindings   0
+Manual bindings      0
+Expired bindings     0
+Malformed messages   0
+Secure arp entries   0
+
+Message              Received
+BOOTREQUEST          0
+DHCPDISCOVER         0
+DHCPREQUEST          0
+DHCPDECLINE          0
+DHCPRELEASE          0
+DHCPINFORM           0
+
+Message              Sent
+BOOTREPLY            0
+DHCPOFFER            0
+DHCPACK              0
+DHCPNAK              0
+R2#
+```
