@@ -1,0 +1,96 @@
+Building configuration...
+
+Current configuration : 1090 bytes
+!
+! Last configuration change at 12:41:51 CST Wed Oct 4 2023
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname S2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$68Ux$SovTLeJ9418q6DWQAB2YX0
+!
+no aaa new-model
+clock timezone CST 3 0
+!
+!
+!         
+!
+!
+!
+!
+!
+no ip domain-lookup
+ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+!
+! 
+!
+!
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+!
+interface Ethernet0/1
+ switchport mode access
+ shutdown
+!
+interface Ethernet0/2
+ switchport mode access
+ shutdown
+!
+interface Ethernet0/3
+!
+interface Vlan1
+ ip address 192.168.1.98 255.255.255.240
+ shutdown
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+ip route 0.0.0.0 0.0.0.0 192.168.1.97
+!
+!
+!
+!
+!
+control-plane
+!
+banner motd ^Caccess to this device is prohibited^C
+!
+line con 0
+ password 7 045802150C2E
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ password 7 070C285F4D06
+ login
+!         
+!
+end
