@@ -911,3 +911,5 @@ VPCS> ping 2001:db8:acad:1::1
 2001:db8:acad:1::1 icmp6_seq=4 ttl=63 time=0.769 ms
 2001:db8:acad:1::1 icmp6_seq=5 ttl=63 time=0.861 ms
 ```
+
+PS: как можно проверить, что DNS был получен?
