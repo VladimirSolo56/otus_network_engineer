@@ -598,7 +598,7 @@ R2#
 || |   fe80::1 |
 |        | e0/1   | 2001:db8:acad:1::1/64      |
 || |   fe80::1 |
-| R2     | e0/0   |  2001:db8:acad:1::1/64     |
+| R2     | e0/0   |  2001:db8:acad:2::2/64     |
 || |   fe80::1 |
 |      | e0/1   |  2001:db8:acad:3::1 /64       |
 || |   fe80::1 |
@@ -709,8 +709,8 @@ R1(config-if)#no shutdown
 
 
 R2(config)#int et 0/0
-R2(config-if)#ipv6 address 2001:db8:acad:1::1/64
-R2(config-if)#ipv6 address fe80::1 link-local 
+R2(config-if)#ipv6 address 2001:db8:acad:2::2/64
+R2(config-if)#ipv6 address fe80::2 link-local 
 R2(config-if)#no shutdown 
 R2(config-if)#int et 0/3
 R2(config-if)#ipv6 address 2001:db8:acad:3::1/64
@@ -719,12 +719,195 @@ R2(config-if)#no shutdown
 ```
 2. Настройте маршрут по умолчанию на каждом маршрутизаторе, указанном на IP-адрес Et0/0 на другом маршрутизаторе.
 ```
-R1(config)#ipv6 route ::/0 2001:db8:acad:1::2
+R1(config)#ipv6 route ::/0 2001:DB8:ACAD:2::2
 R2(config)#ipv6 route ::/0 2001:db8:acad:2::1
 ```
-3. Убедитесь, что маршрутизация работает, проверив адрес G0/0/1 R2 с R1. 
+3. Убедитесь, что маршрутизация работает, проверив адрес Et0/3 R2 с R1. 
 ```
+R1#ping 2001:DB8:ACAD:3::1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:3::1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```
 4. Сохраните текущую конфигурацию в файле конфигурации запуска.
 ```
+R1#wr mem
+Building configuration...
+[OK]
+```
+## Часть 2: Проверьте назначение адреса SLAAC с помощью R1
+В части 2 вы убедитесь, что хост-компьютер получает IPv6-адрес, используя метод SLAAC.
+Включите PC-A и убедитесь, что сетевая карта настроена на автоматическую настройку IPv6.
+Через несколько мгновений результаты команды ipconfig должны показать, что PCA присвоил себе адрес из сети 2001:db8:1::/64.
+C:\Users\Student > ipconfig
+Конфигурация IP-адреса Windows
+
+Сетевой адаптер Ethernet 2:
+```
+VPCS> ip auto
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6805/64
+ROUTER LINK-LAYER : aa:bb:cc:00:30:10
+
+VPCS> show ipv6
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6805/64
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6805/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:30:10
+MAC               : 00:50:79:66:68:05
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+
+```
+  
+
+Вопрос:
+Откуда взялась часть адреса, содержащая идентификатор хоста?
+```2050:79ff:fe66:6805``` сгенерировалась на основе mac адреса ```00:50:79:66:68:05```.
+## Часть 3. Настройка и проверка сервера DHCPv6 на маршрутизаторе R1
+
+### Шаг 1: Изучите конфигурацию PC-A более подробно.
+1. Выполните команду ipconfig /all на PC-A и взгляните на выходные данные.
+Нашел единственную команду, которая показывает информацию про ipv6 
+```
+DVPCS> show ipv6    
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6805/64
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6805/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:30:10
+MAC               : 00:50:79:66:68:05
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+```
+2. Обратите внимание, что нет основного DNS-суффикса. 
+Обратил внимание что DNS вообще отсутствует. Попытки перезапустить и создать новый pc не помогло отобразить DNS-сервер
+
+
+### Шаг 2: Настройте R1 для предоставления DHCPv6 без сохранения состояния для ПК-A.
+1. Создайте пул DHCP IPv6 на R1 с именем R1-STATELESS. Как часть этого пула, назначьте адрес DNS-сервера как 2001:db8:acad::1, а доменное имя как stateless.com .
+Откройте окно конфигурации
+```
+R1(config-if)#ipv6 dhcp pool R1_Stateless
+R1(config-dhcpv6)#dns-server 2001:db8:acad::254
+R1(config-dhcpv6)#domain-name STATELESS.com
+```
+2. Настройте интерфейс G0/0/1 на R1, чтобы предоставить ДРУГОЙ флаг конфигурации для локальной сети R1, и укажите пул DHCP, который вы только что создали, в качестве ресурса DHCP для этого интерфейса.
+```
+R1(config)#interface et0/1
+R1(config-if)#ipv6 nd other-config-flag 
+R1(config-if)#ipv6 dhcp server R1_Stateless
+```
+3. Сохраните текущую конфигурацию в файле конфигурации запуска.
+```
+R1#wr memory 
+Building configuration...
+[OK]
+```
+4. Перезагрузите компьютер-A.
+5. Проверьте выходные данные ipconfig /all и обратите внимание на изменения.
+```
+VPCS>  show ipv6    
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6805/64
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6805/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:30:10
+MAC               : 00:50:79:66:68:05
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+```
+DNS так же отсутствует. Попытки перезапустить и создать новый pc не помогло отобразить DNS-сервер
+6. Проверьте подключение, проверив IP-адрес интерфейса Et0/3 R2.
+```
+VPCS> ping  2001:db8:acad:3::1
+
+2001:db8:acad:3::1 icmp6_seq=1 ttl=63 time=9.629 ms
+2001:db8:acad:3::1 icmp6_seq=2 ttl=63 time=0.749 ms
+2001:db8:acad:3::1 icmp6_seq=3 ttl=63 time=0.660 ms
+2001:db8:acad:3::1 icmp6_seq=4 ttl=63 time=0.910 ms
+2001:db8:acad:3::1 icmp6_seq=5 ttl=63 time=0.631 ms
+
+```
+
+## Часть 4: Настройка DHCPv6-сервера с отслеживанием состояния на R1
+В части 4 вы настроите R1 для ответа на запросы DHCPv6 из локальной сети на R2.
+1. Создайте пул DHCPv6 на R1 для сети 2001:db8:acad:3:aaaa::/80. Это предоставит адреса локальной сети, подключенной к интерфейсу G0/0/1 на R2. Как часть пула, установите для DNS-сервера значение 2001:db8:acad::254, а для доменного имени установите значение STATEFUL.com .
+```
+R1(config)#ipv6 dhcp pool R2_STATEFUL
+R1(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
+R1(config-dhcpv6)#dns-server 2001:db8:acad::254
+R1(config-dhcpv6)#domain-name STATEFUL.com
+```
+2. Назначьте пул DHCPv6, который вы только что создали, интерфейсу g0/0/0 на R1.
+```
+R1(config)#interface et0/0
+R1(config-if)#ipv6 dhcp server R2_STATEFUL
+```
+## Часть 5: Настройте и проверьте реле DHCPv6 на R2.
+В части 5 вы настроите и проверите ретрансляцию DHCPv6 на R2, что позволит PC-B получать IPv6-адрес.
+### Шаг 1: Включите PC-B и проверьте адрес SLAAC, который он генерирует.
+C:\Users\Student > ipconfig /все
+
+Сетевой адаптер Ethernet0:
+```
+VPCS> show ipv6
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6806/64
+GLOBAL SCOPE      : 2001:db8:acad:3:2050:79ff:fe66:6806/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:40:30
+MAC               : 00:50:79:66:68:06
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+```
+Обратите внимание в выходных данных, что используется префикс 2001:db8:acad:3::
+### Шаг 2: Настройте R2 в качестве агента ретрансляции DHCP для локальной сети на G0/0/1.
+1. Сконфигурируйте команду ретрансляции dhcp ipv6 на интерфейсе R2 G0/0/1, указав адрес назначения интерфейса G0/0/0 на R1. Также настройте команду managed-config-flag.
+Откройте окно конфигурации
+```
+R2(config)#int et0/3
+R2(config-if)#ipv6 nd managed-config-flag 
+R2(config-if)#ipv6 dhcp relay destination 2001:db8:acad:2::1 et0/0
+```
+2. Сохраните вашу конфигурацию.
+Закройте окно настройки
+### Шаг 3: Попытайтесь получить IPv6-адрес из DHCPv6 на PC-B.
+1. Перезагрузите компьютер-B.
+2. Откройте командную строку на ПК-B и введите команду ipconfig /all и проверьте выходные данные, чтобы увидеть результаты работы ретранслятора DHCPv6.
+C:\Users\Student > ipconfig /все
+
+Сетевой адаптер Ethernet0:
+```
+VPCS> show ipv6
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6806/64
+GLOBAL SCOPE      : 2001:db8:acad:3:2050:79ff:fe66:6806/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:40:30
+MAC               : 00:50:79:66:68:06
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+
+```
+3. Проверьте подключение, проверив IP-адрес интерфейса Et0/1 R1.
+```
+VPCS> ping 2001:db8:acad:1::1
+
+2001:db8:acad:1::1 icmp6_seq=1 ttl=63 time=9.649 ms
+2001:db8:acad:1::1 icmp6_seq=2 ttl=63 time=0.710 ms
+2001:db8:acad:1::1 icmp6_seq=3 ttl=63 time=0.753 ms
+2001:db8:acad:1::1 icmp6_seq=4 ttl=63 time=0.769 ms
+2001:db8:acad:1::1 icmp6_seq=5 ttl=63 time=0.861 ms
 ```
