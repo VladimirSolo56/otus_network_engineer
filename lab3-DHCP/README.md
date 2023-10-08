@@ -613,61 +613,114 @@ R2#
 Откройте окно конфигурации
 1. Назначьте коммутатору имя устройства.
 ```
+Switch(config)#hostname S1
 ```
 2. Отключите поиск по DNS, чтобы маршрутизатор не пытался перевести неправильно введенные команды так, как если бы они были именами хостов.
 ```
+S1(config)#no ip domain-lookup 
 ```
 3. Назначьте class в качестве привилегированного зашифрованного пароля EXEC.
 ```
+S1(config)#enable secret class
 ```
 4. Назначьте cisco в качестве пароля консоли и включите вход в систему.
 ```
+S1(config)#line console 0
+S1(config-line)#password cisco
+S1(config-line)#login
 ```
 5. Назначьте cisco в качестве пароля VTY и разрешите вход в систему.
 ```
+S1(config)#line vty 0 4
+S1(config-line)#password cisco
+S1(config-line)#login
 ```
 6. Зашифруйте пароли в виде открытого текста.
 ```
+S1(config)#service password-encryption
 ```
 7. Создайте баннер, предупреждающий любого, кто получает доступ к устройству, о том, что несанкционированный доступ запрещен.
 ```
+S1(config)#banner motd #access to this device is prohibited#
 ```
 8. Отключите все неиспользуемые порты
 ```
+S1(config)#int range et0/1-2
+S1(config-if-range)#shutdown 
+
+S2(config)#int range et0/1-2
+S2(config-if-range)#shut
 ```
 9. Сохраните текущую конфигурацию в файле конфигурации запуска.
 ### Шаг 3: Настройте основные параметры для каждого маршрутизатора.
 1. Назначьте маршрутизатору имя устройства.
 ```
+Router(config)#hostname R1
 ```
 2. Отключите поиск по DNS, чтобы маршрутизатор не пытался перевести неправильно введенные команды так, как если бы они были именами хостов.
 ```
+R1(config)#no ip domain-lookup 
 ```
 3. Назначьте class в качестве привилегированного зашифрованного пароля EXEC.
 ```
+R1(config)#enable secret class
 ```
 4. Назначьте cisco в качестве пароля консоли и включите вход в систему.
 ```
+R1(config)#line console 0
+R1(config-line)#password cisco
+R1(config-line)#login
 ```
 5. Назначьте cisco в качестве пароля VTY и разрешите вход в систему.
 ```
+R1(config)#line vty 0 4 
+R1(config-line)#password cisco
+R1(config-line)#login
 ```
 6. Зашифруйте пароли в виде открытого текста.
 ```
+R1(config)#service password-encryption 
 ```
 7. Создайте баннер, предупреждающий любого, кто получает доступ к устройству, о том, что несанкционированный доступ запрещен.
 ```
+R1(config)#banner motd #access to this device is prohibited#
 ```
 8. Включите маршрутизацию IPv6
 ```
+R1(config)#ipv6 unicast-routing
 ```
 9. Сохраните текущую конфигурацию в файле конфигурации запуска.
+```
+R1#wr mem
+Building configuration...
+[OK]
+```
 ### Шаг 4: Настройте интерфейсы и маршрутизацию для обоих маршрутизаторов.
-1. Сконфигурируйте интерфейсы G0/0/0 и G0/0/1 на R1 и R2 с использованием IPv6-адресов, указанных в таблице выше.
+1. Сконфигурируйте интерфейсы Et0/0 и Et0/1 на R1 и Et0/0 и Et0/3 R2 с использованием IPv6-адресов, указанных в таблице выше.
 ```
+R1(config-if)#int et0/0 
+R1(config-if)#ipv6 address fe80::1 link-local 
+R1(config-if)#ipv6 address 2001:db8:acad:2::1/64
+R1(config-if)#no shutdown 
+R1(config-if)#int et0/1                         
+R1(config-if)#ipv6 address 2001:db8:acad:1::1/64
+R1(config-if)#ipv6 address fe80::1 link-local   
+R1(config-if)#no shutdown
+
+
+R2(config)#int et 0/0
+R2(config-if)#ipv6 address 2001:db8:acad:1::1/64
+R2(config-if)#ipv6 address fe80::1 link-local 
+R2(config-if)#no shutdown 
+R2(config-if)#int et 0/3
+R2(config-if)#ipv6 address 2001:db8:acad:3::1/64
+R2(config-if)#ipv6 address fe80::1 link-local 
+R2(config-if)#no shutdown 
 ```
-2. Настройте маршрут по умолчанию на каждом маршрутизаторе, указанном на IP-адрес G0/0/0 на другом маршрутизаторе.
+2. Настройте маршрут по умолчанию на каждом маршрутизаторе, указанном на IP-адрес Et0/0 на другом маршрутизаторе.
 ```
+R1(config)#ipv6 route ::/0 2001:db8:acad:1::2
+R2(config)#ipv6 route ::/0 2001:db8:acad:2::1
 ```
 3. Убедитесь, что маршрутизация работает, проверив адрес G0/0/1 R2 с R1. 
 ```
