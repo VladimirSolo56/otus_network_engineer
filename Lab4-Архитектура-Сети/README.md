@@ -109,10 +109,25 @@
 Таблица VLAN
 | VLAN| NAME| Interface Assigned |
 |------|----|-------------------|
-|3|Management| S1: VLAN 3|
-|||S2: VLAN 3|
-|||S1: e2/0|
-|4| Operations| S2: e3/0|
-|7| ParkingLot| S1: e0/2-3,e1/0-3,e2/1-3,e3/0-3,e4/0-3,e5/0-3|
-|||S2: e0/0, e0/2-3,e1/0-3,e2/0-3,e3/1-3,e4/0-3,e5/0-3|
-|8| Native| N/A|
+|8		|VPC8		|SW9: VLAN 8|
+|		|			|SW9: e0/2 |
+|10		|VPC		|S10: VLAN 10|
+|  		|			|SW10: e0/2 |
+|30		|VPC30		|S29: VLAN 30|
+|  		|			|SW29: e0/0 |
+|31		|VPC31		|S29: VLAN 31|
+|  		|			|SW29: e0/1 |
+|70		|VPC70		|SW4: VLAN 70|
+|		|			|SW3: VLAN 70|
+|  		|			|SW3: e0/2 |
+|100	|VPC100		|SW5: VLAN 100|
+|		|			|SW2: VLAN 100|
+|  		|			|SW2: e0/2 |
+|7		| ParkingLot|SW2: |
+|		|			|SW3:|
+|		|			|SW4:|
+|		|			|SW5:|
+|		|			|SW9:|
+|		|			|SW10:|
+|		|			|SW29:|
+|999		| Native	| N/A|
