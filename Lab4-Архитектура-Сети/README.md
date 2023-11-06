@@ -133,7 +133,7 @@
 
 ### 2. Настроите ip адреса на каждом активном порту
 
-1. Тут будут проведены настройки одного устройства router switch VPC остальные будут настроенны по аналогии с этими настройками в соответствии с таблицами адресации и VLAN
+#### 1. Тут будут проведены настройки одного устройства router 
 
 1. Задал имя роутеру:
 
@@ -187,4 +187,88 @@ R27#write memory
 R27(config)#interface Ethernet0/0
 R27(config-if)#ip address 192.168.127.2 255.255.255.252
 R27(config-if)#no shutdown 
+```
+#### 2. Тут будут проведены настройки одного устройства switch 
+## Шаг 1: Создайте VLAN на обоих коммутаторах
+1. Создал vlan:
+```
+S29(config)#vlan 30
+S29(config-vlan)#name VPC3031
+S29(config-vlan)#exit
+SW29(config)#vlan 7
+SW29(config-vlan)#name
+SW29(config-vlan)#name ParkingLot
+SW29(config-vlan)#exit
+SW29(config)#vla
+SW29(config)#vlan 999
+SW29(config-vlan)#name
+SW29(config-vlan)#name Native
+SW29(config-vlan)#exit
+```
+
+2. Настроил интерфейс на основе таблицы:
+```
+interface Vlan3
+ip address 10.0.30.1 255.255.255.248
+```
+3. Назначил vlan на неиспользуемые порты:
+```
+S29(config)#int range Ethernet0/3 
+S29(config-if-range)#switchport mode access
+S29(config-if-range)#switchport access vlan 7
+```
+## Шаг 2: Назначьте VLAN правильным интерфейсам коммутатора.
+
+1. Настроил интерфейс
+```
+S1(config)#int et2/0
+S1(config-if)#switchport mode access
+S1(config-if)#switchport access vlan 3 
+
+```
+2. Вывод команды ```show vlan brief``` :
+```
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/2
+7    ParkingLot                       active    Et0/3
+30   VPC3031                          active    Et0/0, Et0/1
+999  Native                           active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+```
+3. Вручную настроил магистральный интерфейс S29 e0/2
+```
+SW29(config)#int et0/2
+SW29(config-if)#switchport trunk encapsulation dot1q 
+SW29(config-if)#switchport mode trunk 
+SW29(config-if)#switchport trunk native vlan 999
+SW29(config-if)#switchport trunk allowed vlan 30,999
+```
+4. В качестве проверки настройки просмотрел вызов команды ```show interfaces trunk```:
+```
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/2       on               802.1q         trunking      999
+
+Port        Vlans allowed on trunk
+Et0/2       30,999
+
+Port        Vlans allowed and active in management domain
+Et0/2       30,999
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/2       30,999
+```
+5. Настройка VPC30:
+```
+VPCS> set pcname VPC30
+
+VPC30> ip 10.0.30.2 255.255.255.248 10.0.30.1
+Checking for duplicate address...
+VPC30 : 10.0.30.2 255.255.255.248 gateway 10.0.30.1
+VPC30> save
+Saving startup configuration to startup.vpc
+.  done
 ```
