@@ -1,0 +1,110 @@
+Building configuration...
+
+Current configuration : 1085 bytes
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R14
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$kGMZ$FpV6uCgT3tD9jRRIQC3KM0
+!
+no aaa new-model
+clock timezone CST 3 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!         
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!         
+!
+!
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ ip address 192.168.14.1 255.255.255.252
+!
+interface Ethernet0/1
+ ip address 192.168.14.5 255.255.255.252
+!
+interface Ethernet0/2
+ ip address 192.168.101.1 255.255.255.252
+!
+interface Ethernet0/3
+ ip address 192.168.14.9 255.255.255.252
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!         
+!
+!
+banner motd ^Caccess to this device is prohibited^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 0822455D0A16
+ logging synchronous
+line aux 0
+line vty 0 4
+ password 7 094F471A1A0A
+ login
+ transport input none
+!
+!
+end
