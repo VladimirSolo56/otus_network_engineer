@@ -272,5 +272,5 @@ Checking for duplicate address...
 VPC30 : 10.0.30.2 255.255.255.248 gateway 10.0.30.1
 VPC30> save
 Saving startup configuration to startup.vpc
-.  done
+.  done 
 ```
