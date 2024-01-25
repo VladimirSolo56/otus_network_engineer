@@ -43,4 +43,39 @@ VPC30> ping 192.168.28.1
 ```
 ## Распределите трафик между двумя линками с провайдером.
 
-1. 
+1. Определил расширенный access-list:
+```
+R28(config)#ip access-list extended R25-priority-ONE
+R28(config-ext-nacl)#permit tcp any any eq 22 telnet
+```
+2. Создал route-map:
+```
+R28(config)#route-map Eth0/1 permit 10
+R28(config-route-map)#match ip address R25-priority-ONE
+```
+3. Зафиксировал на интерфейсе:
+```
+R28(config)#interface et0/0
+R28(config-if)#ip policy route-map Eth0/1
+```
+PBR - работает
+```
+R28#show route-map
+route-map Eth0/1, permit, sequence 10
+  Match clauses:
+    ip address (access-lists): R25-priority-ONE 
+  Set clauses:
+  Policy routing matches: 8 packets, 480 bytes
+```
+Аналогично на R25 роутере
+
+## Настроите отслеживание линка через технологию IP SLA.(только для IPv4)
+
+1.
+
+##  Настройте для офиса Лабытнанги маршрут по-умолчанию.
+
+1. Добавлил на роутер офиса Лабытнанги маршрут по-умолчанию.
+```
+R27(config)#ip route 0.0.0.0 0.0.0.0 192.168.127.1
+```
