@@ -1,0 +1,147 @@
+Building configuration...
+
+Current configuration : 1864 bytes
+!
+! Last configuration change at 14:34:53 CST Sun Jan 28 2024
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R28
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$59M6$L4/pr8uRfX0OZTdcvE7oT/
+!
+no aaa new-model
+clock timezone CST 3 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+redundancy
+!
+!
+track 1 ip sla 1 reachability
+ delay down 90 up 90
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!         
+!
+interface Ethernet0/0
+ ip address 192.168.129.2 255.255.255.252
+!
+interface Ethernet0/1
+ ip address 192.168.128.2 255.255.255.252
+!
+interface Ethernet0/2
+ ip address 192.168.28.1 255.255.255.252
+ ip policy route-map Eth0/1-Telnet-only
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!         
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 192.168.128.1 50 name IPS1 track 1
+ip route 0.0.0.0 0.0.0.0 192.168.129.1 100
+ip route 10.0.30.0 255.255.255.248 192.168.28.2
+!
+ip access-list extended R25-priority-ONE
+ permit tcp any any eq 22 telnet
+!
+ip sla 1
+ icmp-echo 192.168.1.13 source-ip 192.168.128.2
+ip sla schedule 1 life forever start-time now
+!
+route-map Eth0/1-Telnet-only permit 20
+ match ip address R25-priority-ONE
+ set ip next-hop 192.168.128.1
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner motd ^Caccess to this device is prohibited^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 110A1016141D
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ password 7 1511021F0725
+ login
+ transport input all
+!
+!
+end
