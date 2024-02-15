@@ -1,8 +1,8 @@
 Building configuration...
 
-Current configuration : 1540 bytes
+Current configuration : 1705 bytes
 !
-! Last configuration change at 21:06:44 CST Tue Feb 13 2024
+! Last configuration change at 20:29:07 CST Thu Feb 15 2024
 !
 version 15.4
 service timestamps debug datetime msec
@@ -67,9 +67,6 @@ redundancy
 !
 !
 !
-interface Loopback1
- ip address 64.100.1.1 255.255.255.252
-!
 interface Ethernet0/0
  ip address 192.168.14.13 255.255.255.252
  ip ospf 100 area 10
@@ -86,23 +83,38 @@ interface Ethernet0/3
  ip address 192.168.14.21 255.255.255.252
  ip ospf 100 area 102
 !
+interface Ethernet1/0
+ ip address 192.168.14.42 255.255.255.252
+ ip ospf 100 area 0
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
 router ospf 100
  area 102 filter-list prefix block-101 in
  default-information originate
 !
 ip forward-protocol nd
-!         
+!
 !
 no ip http server
 no ip http secure-server
-ip route 0.0.0.0 0.0.0.0 Loopback1
+ip route 0.0.0.0 0.0.0.0 Null0
 !
 !
-ip prefix-list block-101 seq 5 deny 192.168.14.10/32
+ip prefix-list block-101 seq 5 deny 192.168.14.8/30
+ip prefix-list block-101 seq 10 permit 0.0.0.0/0 le 32
 !
-ip prefix-list permit-101 seq 5 permit 192.168.14.0/24
-!
-!
+!         
 !
 control-plane
 !
@@ -125,5 +137,5 @@ line vty 0 4
  login
  transport input none
 !
-!
+!         
 end
