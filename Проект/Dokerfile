@@ -1,0 +1,50 @@
+FROM debian:bookworm
+#Tools
+RUN apt-get update  && apt-get install -y inetutils-ping vim-tiny  iproute2 ethtool ifupdown ssh tcpdump  procps net-tools && apt-get clean all
+# NHRP dependency and additional packages
+#RUN apt-get update  && apt-get install -y  && apt-get clean all
+#GRE dependencies
+RUN apt-get install -y  iproute2 ethtool ifupdown && apt-get clean all
+#FRR dependencies
+RUN apt-get install -y init rsyslog libc-ares2 libreadline8 libyang2 lsof libsnmp40 libjs-sphinxdoc python3
+#Generating certificates
+RUN apt-get install -y python3-requests  && apt-get clean all
+
+#Deb-packages
+COPY ./app /app
+#NHRP settings
+COPY ./image_version /etc
+RUN mkdir -p /var/run/opennhrp/
+RUN touch /var/run/opennhrp/opennhrp.socket
+RUN chmod 755 /var/run/opennhrp/
+RUN chmod 644 /var/run/opennhrp/opennhrp.socket
+# Script for configuring containers
+COPY setup_os.sh /
+RUN chmod +x /setup_os.sh
+# Directory with individual configuration files
+COPY ./generated_configs /generated_configs
+#Installing packages
+RUN dpkg -i /app/*.deb
+COPY ./daemons /etc/frr/daemons
+
+#Userspace client
+
+#gamma ver_E_Nilov
+COPY ./Import/eg_data ./root
+RUN mkdir -p /var/s-terra/ext-gamma/
+RUN cp /root/eg_data /var/s-terra/ext-gamma/
+
+
+
+#Install client
+COPY /client-tun-collider.mk13 /client-tun-transit
+RUN chmod +x ./client-tun-transit/install-clientul_stra.sh
+RUN ./client-tun-transit/install-clientul_stra.sh
+# Script for configuring containers Userspace Client
+COPY /scripts /scripts
+RUN chmod +x /scripts/*
+#Import
+COPY /Import /Import
+#TransitThruOnlyTun
+COPY /Import/ipsm.ini /opt/VPNagent/etc/ipsm.ini
+RUN integr_mgr calc -f /opt/VPNagent/etc/ipsm.ini
