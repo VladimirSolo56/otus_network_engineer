@@ -1,0 +1,128 @@
+Building configuration...
+
+Current configuration : 1456 bytes
+!
+! Last configuration change at 21:49:28 CST Mon Apr 22 2024
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R18
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$E2Q2$cp2Ybo1Y.SAyLcqMPJaIe0
+!
+no aaa new-model
+clock timezone CST 3 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ ip address 192.168.0.1 255.255.255.252
+!
+interface Ethernet0/1
+ ip address 192.168.0.5 255.255.255.252
+!
+interface Ethernet0/2
+ ip address 192.168.122.2 255.255.255.252
+!
+interface Ethernet0/3
+ ip address 192.168.121.1 255.255.255.252
+!
+!
+router eigrp EIGRP-Piter
+ !
+ address-family ipv4 unicast autonomous-system 1
+  !
+  topology base
+   redistribute static
+  exit-af-topology
+  network 192.168.0.0
+  network 192.168.121.0
+  network 192.168.122.0
+  eigrp router-id 18.18.18.18
+ exit-address-family
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 Ethernet0/2
+!
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner motd ^CCCaccess to this device is prohibited^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 110A1016141D
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ password 7 00071A150754
+ login
+ transport input none
+!
+!
+end
