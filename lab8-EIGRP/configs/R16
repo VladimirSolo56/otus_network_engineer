@@ -1,21 +1,19 @@
 Building configuration...
 
-Current configuration : 1334 bytes
-!
-! Last configuration change at 21:29:00 CST Mon Apr 22 2024
+Current configuration : 1435 bytes
 !
 version 15.4
 service timestamps debug datetime msec
 service timestamps log datetime msec
 service password-encryption
 !
-hostname R16
+hostname R17
 !
 boot-start-marker
 boot-end-marker
 !
 !
-enable secret 5 $1$YAyh$QEhVUR12Pm2Xn9ytDiR2U/
+enable secret 5 $1$gqra$8.V2JQ4eMrZQ25Hti5XWo1
 !
 no aaa new-model
 clock timezone CST 3 0
@@ -24,7 +22,7 @@ no mmi auto-configure
 no mmi pvc
 mmi snmp-timeout 180
 !
-!
+!         
 !
 !
 !
@@ -45,9 +43,9 @@ multilink bundle-name authenticated
 !
 !
 !
+!
+!
 !         
-!
-!
 !
 !
 !
@@ -68,33 +66,35 @@ redundancy
 !
 !
 interface Ethernet0/0
- ip address 192.168.0.17 255.255.255.252
+ ip address 192.168.0.9 255.255.255.252
 !
 interface Ethernet0/1
- ip address 192.168.0.2 255.255.255.252
+ ip address 192.168.0.6 255.255.255.252
 !
 interface Ethernet0/2
- ip address 192.168.0.21 255.255.255.252
+ ip address 192.168.0.13 255.255.255.252
 !
 interface Ethernet0/3
- ip address 192.168.0.26 255.255.255.252
+ no ip address
+ shutdown
 !
 !
 router eigrp EIGRP-Piter
  !
  address-family ipv4 unicast autonomous-system 1
   !
-   topology base
-   auto-summary
+  af-interface Ethernet0/1
+   summary-address 192.168.0.8 255.255.255.248
+  exit-af-interface
+  !
+  topology base
   exit-af-topology
-  network 192.168.0.0 0.0.0.3
-  network 192.168.0.16 0.0.0.3
-  network 192.168.0.20 0.0.0.3
-  network 192.168.0.24 0.0.0.3
-  eigrp router-id 16.16.16.16
+  network 192.168.0.4 0.0.0.3
+  network 192.168.0.8 0.0.0.3
+  network 192.168.0.12 0.0.0.3
+  eigrp router-id 17.17.17.17
  exit-address-family
-
-
+!
 ip forward-protocol nd
 !
 !
@@ -112,16 +112,16 @@ control-plane
 !
 !
 !
-banner motd ^CCaccess to this device is prohibited^C
+banner motd ^CCCaccess to this device is prohibited^C
 !
 line con 0
  exec-timeout 0 0
- password 7 13061E010803
+ password 7 045802150C2E
  logging synchronous
  login
 line aux 0
 line vty 0 4
- password 7 1511021F0725
+ password 7 045802150C2E
  login
  transport input none
 !

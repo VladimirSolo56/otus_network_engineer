@@ -1,6 +1,6 @@
 Building configuration...
 
-Current configuration : 1224 bytes
+Current configuration : 1435 bytes
 !
 version 15.4
 service timestamps debug datetime msec
@@ -78,24 +78,29 @@ interface Ethernet0/3
  no ip address
  shutdown
 !
+!
 router eigrp EIGRP-Piter
  !
  address-family ipv4 unicast autonomous-system 1
   !
-   topology base
-   auto-summary
+  af-interface Ethernet0/1
+   summary-address 192.168.0.8 255.255.255.248
+  exit-af-interface
+  !
+  topology base
   exit-af-topology
   network 192.168.0.4 0.0.0.3
   network 192.168.0.8 0.0.0.3
   network 192.168.0.12 0.0.0.3
   eigrp router-id 17.17.17.17
  exit-address-family
+!
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
-!         
+!
 !
 !
 !
@@ -107,7 +112,7 @@ control-plane
 !
 !
 !
-banner motd ^CCaccess to this device is prohibited^C
+banner motd ^CCCaccess to this device is prohibited^C
 !
 line con 0
  exec-timeout 0 0
