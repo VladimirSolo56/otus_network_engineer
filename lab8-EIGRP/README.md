@@ -353,3 +353,45 @@ router eigrp EIGRP-Piter
  exit-address-family
 !
 ```
+
+
+## Работа над ошибками 
+
+### 3. Настройка автоматического объединения EIGRP на роутерах R16-17:
+
+1. Так как использовать автоматическую суммаризацию - это весьма опасный и топорный инструмент. Оптимальный и безопасный ход это создать статическую суммаризацию на интерфейсах в сторону R18.
+
+2. Для ручной настройки сумарного маршрута в именованный EIGRP. В R17, так как ```192.168.0.8/30``` ```network 192.168.0.12/30```, то их можно суммаризировать в ```192.168.0.8/29```
+```
+R17(config)# router eigrp EIGRP-Piter 
+R17(config-router)#address-family ipv4 unicast autonomous-system 1
+R17(config-router-af)#af-interface ethernet 0/1
+R17(config-router-af-interface)#summary-address 192.168.0.8 255.255.255.248
+```
+3. Для ручной настройки сумарного маршрута в именованный EIGRP. В R16, так как ```192.168.0.16/30```  ```network 192.168.0.24/30```, то их можно суммаризировать в ```192.168.0.16/28```
+```
+R16(config)#router eigrp EIGRP-Piter
+R16(config-router)#address-family ipv4 unicast autonomous-system 1
+R16(config-router-af)#af-interface ethernet 0/1
+R16(config-router-af-interface)#summary-address 192.168.0.16 255.255.255.240
+```
+4. На R18 успешно пришли суммарные маршруты.
+```
+R18#show ip route eigrp 
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 0.0.0.0 to network 0.0.0.0
+
+      192.168.0.0/24 is variably subnetted, 6 subnets, 4 masks
+D        192.168.0.8/29 [90/1536000] via 192.168.0.6, 00:10:30, Ethernet0/1
+D        192.168.0.16/28 [90/1536000] via 192.168.0.2, 00:00:08, Ethernet0/0
+R18#
+```
