@@ -1,19 +1,21 @@
 Building configuration...
 
-Current configuration : 1489 bytes
+Current configuration : 1808 bytes
+!
+! Last configuration change at 20:29:54 CST Wed May 1 2024
 !
 version 15.4
 service timestamps debug datetime msec
 service timestamps log datetime msec
 service password-encryption
 !
-hostname R12
+hostname R14
 !
 boot-start-marker
 boot-end-marker
 !
 !
-enable secret 5 $1$uON5$oHz.8vGKVvtio8GSaQurW.
+enable secret 5 $1$kGMZ$FpV6uCgT3tD9jRRIQC3KM0
 !
 no aaa new-model
 clock timezone CST 3 0
@@ -22,7 +24,7 @@ no mmi auto-configure
 no mmi pvc
 mmi snmp-timeout 180
 !
-!         
+!
 !
 !
 !
@@ -43,9 +45,9 @@ multilink bundle-name authenticated
 !
 !
 !
-!
-!
 !         
+!
+!
 !
 !
 !
@@ -66,29 +68,24 @@ redundancy
 !
 !
 interface Ethernet0/0
- ip address 192.168.14.25 255.255.255.252
-!
-interface Ethernet0/0.100
- description Vlan 100
- encapsulation dot1Q 100
- ip address 10.0.100.1 255.255.255.240
-!
-interface Ethernet0/0.999
- description Native Vlan
- encapsulation dot1Q 999 native
+ ip address 192.168.14.1 255.255.255.252
+ ip ospf 100 area 10
 !
 interface Ethernet0/1
- ip address 192.168.14.29 255.255.255.252
+ ip address 192.168.14.5 255.255.255.252
+ ip ospf 100 area 10
 !
 interface Ethernet0/2
- ip address 192.168.14.2 255.255.255.252
+ ip address 192.168.101.1 255.255.255.252
+ ip ospf 100 area 0
 !
 interface Ethernet0/3
- ip address 192.168.14.18 255.255.255.252
+ ip address 192.168.14.9 255.255.255.252
+ ip ospf 100 area 101
 !
 interface Ethernet1/0
- no ip address
- shutdown
+ ip address 192.168.14.41 255.255.255.252
+ ip ospf 100 area 0
 !
 interface Ethernet1/1
  no ip address
@@ -102,11 +99,24 @@ interface Ethernet1/3
  no ip address
  shutdown
 !
+router ospf 100
+ area 101 stub no-summary
+ default-information originate
+!
+router bgp 64555
+ bgp log-neighbor-changes
+ network 192.168.14.0
+ network 192.168.101.0 mask 255.255.255.252
+ neighbor 192.168.101.2 remote-as 64655
+!
 ip forward-protocol nd
 !
 !
 no ip http server
 no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 Null0
+ip route 192.168.14.0 255.255.255.0 Null0
+ip route 192.168.101.1 255.255.255.255 Null0
 !
 !
 !
@@ -114,21 +124,20 @@ no ip http secure-server
 control-plane
 !
 !
-!         
 !
 !
 !
 !
-banner motd ^Caccess to this device is prohibited^C
+!
+banner motd ^CCaccess to this device is prohibited^C
 !
 line con 0
  exec-timeout 0 0
- password 7 110A1016141D
+ password 7 0822455D0A16
  logging synchronous
- login
 line aux 0
 line vty 0 4
- password 7 01100F175804
+ password 7 094F471A1A0A
  login
  transport input none
 !
