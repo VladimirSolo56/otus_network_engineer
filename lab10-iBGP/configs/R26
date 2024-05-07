@@ -1,0 +1,143 @@
+Building configuration...
+
+Current configuration : 1724 bytes
+!
+! Last configuration change at 22:07:12 CST Tue May 7 2024
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R26
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$yLUx$nHsXcLsviqT2GznaJg.ho1
+!
+no aaa new-model
+clock timezone CST 3 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!         
+!
+!
+!
+!
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ ip address 192.168.1.10 255.255.255.252
+ ip router isis 
+!
+interface Ethernet0/1
+ ip address 192.168.129.1 255.255.255.252
+!
+interface Ethernet0/2
+ ip address 192.168.1.14 255.255.255.252
+ ip router isis 
+!
+interface Ethernet0/3
+ ip address 192.168.121.2 255.255.255.252
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown 
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+router isis
+ net 49.0026.0000.0026.00
+!
+router bgp 64855
+ bgp log-neighbor-changes
+ network 192.168.28.0 mask 255.255.255.252
+ network 192.168.129.0 mask 255.255.255.252
+ neighbor 192.168.1.1 remote-as 64855
+ neighbor 192.168.1.9 remote-as 64855
+ neighbor 192.168.121.1 remote-as 64955
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 192.168.28.0 255.255.255.252 192.168.129.2
+!         
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner motd ^CCaccess to this device is prohibited^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 05080F1C2243
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ password 7 02050D480809
+ login
+ transport input all
+!
+!
+end
