@@ -324,5 +324,5 @@ Packet sent with a source address of 192.168.0.1
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```
 
-Видно, что все сети в лабораторной работе должны иметь IP связность.
+Видно, что все сети в лабораторной работе имеют IP связность.
 
