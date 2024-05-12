@@ -1,6 +1,8 @@
 Building configuration...
 
-Current configuration : 1877 bytes
+Current configuration : 2060 bytes
+!
+! Last configuration change at 21:05:23 CST Sun May 12 2024
 !
 version 15.4
 service timestamps debug datetime msec
@@ -22,7 +24,7 @@ no mmi auto-configure
 no mmi pvc
 mmi snmp-timeout 180
 !
-!         
+!
 !
 !
 !
@@ -45,14 +47,13 @@ multilink bundle-name authenticated
 !
 !
 !
-!         
+!
 !
 !
 !
 redundancy
 !
 !
-! 
 !
 !
 !
@@ -64,11 +65,16 @@ redundancy
 !
 !
 !
+!
+!
+interface Loopback0
+ ip address 15.15.15.15 255.255.255.255
+ ip ospf 100 area 10
 !
 interface Ethernet0/0
  ip address 192.168.14.13 255.255.255.252
  ip ospf 100 area 10
-!         
+!
 interface Ethernet0/1
  ip address 192.168.14.17 255.255.255.252
  ip ospf 100 area 10
@@ -91,7 +97,7 @@ interface Ethernet1/1
 !
 interface Ethernet1/2
  no ip address
- shutdown 
+ shutdown
 !
 interface Ethernet1/3
  no ip address
@@ -104,9 +110,10 @@ router ospf 100
 router bgp 64555
  bgp log-neighbor-changes
  network 192.168.14.0
- network 192.168.111.0 mask 255.255.255.252
- neighbor 192.168.14.41 remote-as 64555
+ neighbor 14.14.14.14 remote-as 64555
+ neighbor 14.14.14.14 update-source Loopback0
  neighbor 192.168.111.1 remote-as 64755
+ neighbor 192.168.111.1 next-hop-self
 !
 ip forward-protocol nd
 !

@@ -1,6 +1,8 @@
 Building configuration...
 
-Current configuration : 1712 bytes
+Current configuration : 1768 bytes
+!
+! Last configuration change at 22:27:59 CST Sun May 12 2024
 !
 version 15.4
 service timestamps debug datetime msec
@@ -22,7 +24,7 @@ no mmi auto-configure
 no mmi pvc
 mmi snmp-timeout 180
 !
-!         
+!
 !
 !
 !
@@ -45,14 +47,14 @@ multilink bundle-name authenticated
 !
 !
 !
-!         
+!
 !
 !
 !
 redundancy
 !
 !
-! 
+!
 !
 !
 !
@@ -70,11 +72,11 @@ interface Ethernet0/0
 !
 interface Ethernet0/1
  ip address 192.168.1.1 255.255.255.252
- ip router isis 
+ ip router isis
 !
 interface Ethernet0/2
  ip address 192.168.1.5 255.255.255.252
- ip router isis 
+ ip router isis
 !
 interface Ethernet0/3
  no ip address
@@ -91,7 +93,7 @@ interface Ethernet1/1
 interface Ethernet1/2
  no ip address
  shutdown
-!         
+!
 interface Ethernet1/3
  no ip address
  shutdown
@@ -101,13 +103,13 @@ router isis
 !
 router bgp 64855
  bgp log-neighbor-changes
+ neighbor Triad-Conf peer-group
+ neighbor Triad-Conf remote-as 64855
+ neighbor Triad-Conf route-reflector-client
+ neighbor Triad-Conf next-hop-self
  neighbor 192.168.1.6 remote-as 64855
- neighbor 192.168.1.13 remote-as 64855
- neighbor 192.168.1.13 route-reflector-client
- neighbor 192.168.1.13 next-hop-self
- neighbor 192.168.1.14 remote-as 64855
- neighbor 192.168.1.14 route-reflector-client
- neighbor 192.168.1.14 next-hop-self
+ neighbor 192.168.1.13 peer-group Triad-Conf
+ neighbor 192.168.1.14 peer-group Triad-Conf
  neighbor 192.168.105.2 remote-as 64655
 !
 ip forward-protocol nd
@@ -137,7 +139,7 @@ line con 0
 line aux 0
 line vty 0 4
  password 7 030752180500
- login    
+ login
  transport input none
 !
 !
