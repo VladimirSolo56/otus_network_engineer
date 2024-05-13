@@ -1,0 +1,160 @@
+Building configuration...
+
+Current configuration : 2176 bytes
+!
+! Last configuration change at 22:51:55 CST Mon May 13 2024
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname R15
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$sPJg$KZbvovuLXzJNv1z3Ntcpz/
+!
+no aaa new-model
+clock timezone CST 3 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 15.15.15.15 255.255.255.255
+ ip ospf 100 area 10
+!
+interface Ethernet0/0
+ ip address 192.168.14.13 255.255.255.252
+ ip ospf 100 area 10
+!
+interface Ethernet0/1
+ ip address 192.168.14.17 255.255.255.252
+ ip ospf 100 area 10
+!
+interface Ethernet0/2
+ ip address 192.168.111.2 255.255.255.252
+ ip ospf 100 area 0
+!
+interface Ethernet0/3
+ ip address 192.168.14.21 255.255.255.252
+ ip ospf 100 area 102
+!
+interface Ethernet1/0
+ ip address 192.168.14.42 255.255.255.252
+ ip ospf 100 area 0
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+router ospf 100
+ area 102 filter-list prefix block-101 in
+ default-information originate
+!
+router bgp 64555
+ bgp log-neighbor-changes
+ network 192.168.14.0
+ neighbor 14.14.14.14 remote-as 64555
+ neighbor 14.14.14.14 update-source Loopback0
+ neighbor 192.168.111.1 remote-as 64755
+ neighbor 192.168.111.1 next-hop-self
+ neighbor 192.168.111.1 route-map R15 out
+!
+ip forward-protocol nd
+!
+ip as-path access-list 1 permit ^$
+!
+no ip http server
+no ip http secure-server
+ip route 192.168.14.0 255.255.255.0 Null0
+!
+!
+ip prefix-list block-101 seq 5 deny 192.168.14.8/30
+ip prefix-list block-101 seq 10 permit 0.0.0.0/0 le 32
+!
+route-map R15 permit 10
+ match as-path 1
+!
+route-map R15 deny 65000
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner motd ^CCaccess to this device is prohibited^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 094F471A1A0A
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ password 7 045802150C2E
+ login
+ transport input none
+!
+!
+end
