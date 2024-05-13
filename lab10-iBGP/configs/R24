@@ -1,8 +1,8 @@
 Building configuration...
 
-Current configuration : 1825 bytes
+Current configuration : 1861 bytes
 !
-! Last configuration change at 22:28:08 CST Sun May 12 2024
+! Last configuration change at 20:27:20 CST Mon May 13 2024
 !
 version 15.4
 service timestamps debug datetime msec
@@ -107,6 +107,7 @@ router bgp 64855
  neighbor Triad-Conf route-reflector-client
  neighbor Triad-Conf next-hop-self
  neighbor 192.168.1.5 remote-as 64855
+ neighbor 192.168.1.5 next-hop-self
  neighbor 192.168.1.10 peer-group Triad-Conf
  neighbor 192.168.1.13 peer-group Triad-Conf
  neighbor 192.168.122.2 remote-as 64955

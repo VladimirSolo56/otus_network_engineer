@@ -510,3 +510,71 @@ RPKI validation codes: V valid, I invalid, N Not found
 
 ```
 Видно, что трафик идет в Ламас.
+
+## Факультативное задание
+
+Необходимо избежать входящего трафика от входящий трафик по-прежнему может прийти через Киторн, например, если идёт от R23. Можно использовать увеличение AS path prepend при анонсах в сторону Киторн, тогда префиксы в Ламас должны выиграть, и downlink трафик пойдёт только через R15.
+
+
+1. Создадим  ```route-map``` на R14 для увеличения AS path prepend и добавим этот ```route-map``` на выход R22 (Киторн):
+```
+R14(config)#route-map Best-R23-R24-R15 permit 15
+R14(config-route-map)#set as-path prepend 64555 64555 64555
+R14(config-route-map)#exit
+R14(config)#router bgp 64555
+R14(config-router)#neighbor 192.168.101.2 route-map Best-R23-R24-R15 out
+```
+ 
+На R24 был добавлен забытый  next-hop-self, ошибку нашел, когда R23 думал, что next-hop ```192.168.155.2 (inaccessible) from 192.168.1.6 (192.168.155.1) ```, из-за чего выбирал R22
+```
+R22(config)#router bgp 64855
+R22(config-router)#neighbor 192.168.1.5 next-hop-self
+```
+А также дополнил настройку R23:
+```
+R23(config)#router bgp 64855
+R23(config-router)# neighbor 192.168.1.6 next-hop-self
+```
+
+Проверка:
+```
+R23#sh ip bgp
+BGP table version is 16, local router ID is 192.168.105.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
+              x best-external, a additional-path, c RIB-compressed,
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>i 192.168.0.0      192.168.1.6              0    100      0 64955 i
+ * i                  192.168.121.1            0    100      0 64955 i
+ *   192.168.14.0     192.168.105.2                          0 64655 64755 64555 i
+ *>i                  192.168.1.6              0    100      0 64755 64555 i
+ * i 192.168.28.0/30  192.168.129.2            0    100      0 i
+ *>i                  192.168.129.2            0    100      0 i
+ * i 192.168.127.0/30 192.168.1.13             0    100      0 i
+ *>i                  192.168.1.13             0    100      0 i
+ * i 192.168.129.0/30 192.168.1.10             0    100      0 i
+ *>i                  192.168.1.14             0    100      0 i
+
+```
+Да действительно теперь весь трафик обходит Киторн через Ламас 
+```
+R23#sh ip bgp  192.168.14.0
+BGP routing table entry for 192.168.14.0/24, version 16
+Paths: (2 available, best #2, table default)
+  Advertised to update-groups:
+     3          7
+  Refresh Epoch 13
+  64655 64755 64555
+    192.168.105.2 from 192.168.105.2 (192.168.133.2)
+      Origin IGP, localpref 100, valid, external
+      rx pathid: 0, tx pathid: 0
+  Refresh Epoch 13
+  64755 64555
+    192.168.1.6 from 192.168.1.6 (192.168.155.1)
+      Origin IGP, metric 0, localpref 100, valid, internal, best
+      rx pathid: 0, tx pathid: 0x0
+
+```

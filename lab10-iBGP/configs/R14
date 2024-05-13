@@ -1,8 +1,8 @@
 Building configuration...
 
-Current configuration : 2078 bytes
+Current configuration : 2166 bytes
 !
-! Last configuration change at 22:50:15 CST Sun May 12 2024
+! Last configuration change at 20:45:51 CST Mon May 13 2024
 !
 version 15.4
 service timestamps debug datetime msec
@@ -115,6 +115,7 @@ router bgp 64555
  neighbor 192.168.101.2 remote-as 64655
  neighbor 192.168.101.2 next-hop-self
  neighbor 192.168.101.2 route-map BestR15-R21 in
+ neighbor 192.168.101.2 route-map Best-R23-R24-R15 out
 !
 ip forward-protocol nd
 !
@@ -123,11 +124,13 @@ no ip http server
 no ip http secure-server
 ip route 0.0.0.0 0.0.0.0 Null0
 ip route 192.168.14.0 255.255.255.0 Null0
-ip route 192.168.101.1 255.255.255.255 Null0
 !
 !
 route-map BestR15-R21 permit 10
  set local-preference 50
+!
+route-map Best-R23-R24-R15 permit 15
+ set as-path prepend 64555 64555 64555
 !
 !
 !
